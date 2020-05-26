@@ -122,6 +122,7 @@ class Jarvis(CmdInterpreter, object):
 
     def parse_input(self, data):
         """This method gets the data and assigns it to an action"""
+        print_say(self._plugin_manager.get_feature().keys(), self, Fore.RED)
         data = data.lower()
         # say command is better if data has punctuation marks
         # Hack!

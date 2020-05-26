@@ -38,10 +38,23 @@ def plugin(name):
         plugin_class._name = name
         plugin_class._backend = (run,)
         plugin_class._backend_instance = run
+        plugin_class._feature = []
 
         return plugin_class
     return create_plugin
 
+def feature(case_sensitive=None, punctuation=None):
+    feature = []
+    if case_sensitive is not None:
+        feature.append(('case_sensitive', case_sensitive))
+    if punctuation is not None:
+        feature.append(('punctuation',punctuation))
+
+    def __feature(plugin):
+        plugin._feature.extend(feature)
+        return plugin
+
+    return __feature
 
 def require(network=None, platform=None, native=None):
     require = []
@@ -136,6 +149,10 @@ class Plugin(pluginmanager.IPlugin, PluginStorage):
     def require(self):
         """Set with @require"""
         return self._require
+
+    def feature(self):
+        """Set with @feature"""
+        return self._feature
 
     def alias(self):
         """Set with @alias"""

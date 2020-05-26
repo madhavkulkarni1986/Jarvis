@@ -17,6 +17,7 @@ class PluginManager(object):
     def __init__(self):
         self._backend = pluginmanager.PluginInterface()
         self._plugin_dependency = PluginDependency()
+        self._plugin_feature = PluginFeature()
 
         self._cache = None
         self._plugins_loaded = 0
@@ -175,6 +176,50 @@ class PluginManager(object):
         self._load()
         return self._plugins_loaded
 
+    def get_feature(self):
+        return self._plugin_feature.check(plugin)
+
+class PluginFeature(object):
+    """
+    Plugin may have additional features - specified by feature().
+    Please refer to plugin-docku
+
+    This module gets any additional features set for the plugin.
+    """
+
+    def __init__(self):
+        self._feature_has_case_sensitive = False
+        self._feature_has_punctuation = False
+
+    def _plugin_get_features(self, features_iter):
+        plugin_features = {
+            "case_sensitive": [],
+            "punctuation": [],
+        }
+
+        # parse feature
+        for feature in features_iter:
+            key = feature[0]
+            values = feature[1]
+
+            if isinstance(values, bool):
+                values = [values]
+
+            if key in plugin_features:
+                plugin_features[key].extend(values)
+            else:
+                warning("{}={}: Not supported feature".format(key, values))
+
+        return plugin_features
+
+    def check(self, plugin):
+        """
+        Parses plugin.feature(). Plase refer plugin.Plugin-documentation
+        """
+        print("Feature: " + str(type(plugin.feature())))
+        plugin_features = self._plugin_get_features(plugin.feature())
+
+        return plugin_features
 
 class PluginDependency(object):
     """
@@ -223,6 +268,7 @@ class PluginDependency(object):
         """
         Parses plugin.require(). Plase refere plugin.Plugin-documentation
         """
+        print("Require: " + str(type(plugin)))
         plugin_requirements = self._plugin_get_requirements(plugin.require())
 
         if not self._check_platform(plugin_requirements["platform"]):
